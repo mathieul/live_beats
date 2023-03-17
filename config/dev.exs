@@ -13,19 +13,21 @@ config :live_beats, :github,
 
 # Configure your database
 config :live_beats, LiveBeats.Repo,
-  username: "postgres",
+  username: "root",
   password: "postgres",
   database: "live_beats_dev",
   hostname: "localhost",
+  port: 5433,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
 # Configure your replica database
 config :live_beats, LiveBeats.ReplicaRepo,
-  username: "postgres",
+  username: "root",
   password: "postgres",
   database: "live_beats_dev",
   hostname: "localhost",
+  port: 5433,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   priv: "priv/repo"
