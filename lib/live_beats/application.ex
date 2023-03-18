@@ -10,7 +10,18 @@ defmodule LiveBeats.Application do
     LiveBeats.MediaLibrary.attach()
     topologies = Application.get_env(:libcluster, :topologies) || []
 
+    {:ok, whisper} = Bumblebee.load_model({:hf, "openai/whisper-tiny"})
+    {:ok, featurizer} = Bumblebee.load_featurizer({:hf, "openai/whisper-tiny"})
+    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, "openai/whisper-tiny"})
+
+    serving =
+      Bumblebee.Audio.speech_to_text(whisper, featurizer, tokenizer,
+        max_new_tokens: 100,
+        defn_options: [compiler: EXLA]
+      )
+
     children = [
+      {Nx.Serving, name: WhisperServing, serving: serving},
       {Cluster.Supervisor, [topologies, [name: LiveBeats.ClusterSupervisor]]},
       {Task.Supervisor, name: LiveBeats.TaskSupervisor},
       # Start the Ecto repository
