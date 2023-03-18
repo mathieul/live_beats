@@ -1,4 +1,4 @@
-defmodule LiveBeats.MixProject do
+ defmodule LiveBeats.MixProject do
   use Mix.Project
 
   def project do
@@ -54,7 +54,9 @@ defmodule LiveBeats.MixProject do
       {:heroicons, "~> 0.2.2"},
       {:castore, "~> 0.1.13"},
       {:tailwind, "~> 0.1"},
-      {:libcluster, "~> 3.3.1"}
+      {:libcluster, "~> 3.3.1"},
+      {:bumblebee, github: "elixir-nx/bumblebee"},
+      {:exla, ">= 0.0.0"}
     ]
   end
 
