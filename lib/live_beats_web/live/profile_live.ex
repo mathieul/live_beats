@@ -60,6 +60,13 @@ defmodule LiveBeatsWeb.ProfileLive do
       total_count={@presences_count}
     />
 
+    <div id={"transcript-#{@active_song_id}"} phx-update="stream" class="mx-10 px-6">
+      <div :for={{id, segment} <- @streams.transcript_segments} id={id}>
+        <span class="text-gray-400">[<%= LiveBeats.MP3Stat.to_mmss(segment.ss) %>]</span>
+        <%= segment.text %>
+      </div>
+    </div>
+
     <div id="dialogs" phx-update="stream">
       <%= for {_id, song} <- if(@owns_profile?, do: @streams.songs, else: []), id = "delete-modal-#{song.id}" do %>
         <.modal
@@ -151,23 +158,23 @@ defmodule LiveBeatsWeb.ProfileLive do
       Presence.subscribe(profile)
     end
 
-    active_song_id =
-      if song = MediaLibrary.get_current_active_song(profile) do
-        song.id
-      end
+    active_song = MediaLibrary.get_current_active_song(profile)
+
+    segments = if active_song, do: active_song.transcript_segments, else: []
 
     songs = MediaLibrary.list_profile_songs(profile, 50)
 
     socket =
       socket
       |> assign(
-        active_song_id: active_song_id,
+        active_song_id: active_song && active_song.id,
         active_profile_id: current_user.active_profile_user_id,
         profile: profile,
         owns_profile?: MediaLibrary.owns_profile?(current_user, profile),
         songs_count: Enum.count(songs)
       )
       |> stream(:songs, songs)
+      |> stream(:transcript_segments, segments, dom_id: &"ss-#{&1.ss}")
       |> assign_presences()
 
     {:ok, socket, temporary_assigns: [presences: %{}]}
@@ -253,6 +260,14 @@ defmodule LiveBeatsWeb.ProfileLive do
 
   def handle_info({MediaLibrary, %MediaLibrary.Events.Pause{song: song}}, socket) do
     {:noreply, pause_song(socket, song)}
+  end
+
+  def handle_info({MediaLibrary, {%MediaLibrary.Song.TranscriptSegment{} = seg, song_id}}, socket) do
+    if socket.assigns.active_song_id == song_id do
+      {:noreply, stream_insert(socket, :transcript_segments, seg)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info({MediaLibrary, %MediaLibrary.Events.SongsImported{songs: songs}}, socket) do

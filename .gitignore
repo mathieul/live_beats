@@ -31,3 +31,5 @@ npm-debug.log
 
 /priv/uploads
 /tmp
+.DS_Store
+.mix_tasks

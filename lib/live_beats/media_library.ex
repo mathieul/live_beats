@@ -209,6 +209,8 @@ defmodule LiveBeats.MediaLibrary do
           |> Enum.filter(&match?({{:song, _ref}, _}, &1))
           |> Enum.map(fn {{:song, ref}, song} ->
             consume_file.(ref, fn tmp_path -> store_mp3(song, tmp_path) end)
+            async_transcribe(song, user)
+
             {ref, song}
           end)
 
@@ -226,6 +228,22 @@ defmodule LiveBeats.MediaLibrary do
 
         {:error, {failed_op, failed_val}}
     end
+  end
+
+  defp async_transcribe(%Song{} = song, %Accounts.User{} = user) do
+    Task.Supervisor.start_child(LiveBeats.TaskSupervisor, fn ->
+      segments =
+        LiveBeats.Audio.speech_to_test(song.mp3_filepath, 20, fn ss, text ->
+          segment = %Song.TranscriptSegment{ss: ss, text: text}
+          broadcast!(user.id, {segment, song.id})
+
+          segment
+        end)
+
+      Repo.update_all(from(s in Song, where: s.id == ^song.id),
+        set: [transcript_segments: segments]
+      )
+    end)
   end
 
   defp broadcast_imported(%Accounts.User{} = user, songs) do
