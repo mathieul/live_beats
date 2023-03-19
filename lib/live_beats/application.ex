@@ -5,14 +5,17 @@ defmodule LiveBeats.Application do
 
   use Application
 
+  @whisper_model "openai/whisper-small"
+  # @whisper_model "openai/whisper-large-v2"
+
   @impl true
   def start(_type, _args) do
     LiveBeats.MediaLibrary.attach()
     topologies = Application.get_env(:libcluster, :topologies) || []
 
-    {:ok, whisper} = Bumblebee.load_model({:hf, "openai/whisper-tiny"})
-    {:ok, featurizer} = Bumblebee.load_featurizer({:hf, "openai/whisper-tiny"})
-    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, "openai/whisper-tiny"})
+    {:ok, whisper} = Bumblebee.load_model({:hf, @whisper_model})
+    {:ok, featurizer} = Bumblebee.load_featurizer({:hf, @whisper_model})
+    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, @whisper_model})
 
     serving =
       Bumblebee.Audio.speech_to_text(whisper, featurizer, tokenizer,
