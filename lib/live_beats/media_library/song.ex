@@ -63,8 +63,8 @@ defmodule LiveBeats.MediaLibrary.Song do
     |> Ecto.Changeset.change(%{duration: duration})
     |> Ecto.Changeset.validate_number(:duration,
       greater_than: 0,
-      less_than: 1200,
-      message: "must be less than 20 minutes"
+      less_than: 12_000,
+      message: "must be less than 200 minutes"
     )
   end
 

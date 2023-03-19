@@ -28,7 +28,7 @@ defmodule LiveBeatsWeb.ProfileLive.UploadFormComponent do
        progress: &handle_progress/3,
        accept: ~w(.mp3),
        max_entries: @max_songs,
-       max_file_size: 20_000_000,
+       max_file_size: 200_000_000,
        chunk_size: 64_000 * 3
      )}
   end
@@ -154,7 +154,7 @@ defmodule LiveBeatsWeb.ProfileLive.UploadFormComponent do
     do: ~H|<%= @label %>: dropped (exceeds limit of 10 files)|
 
   defp file_error(%{kind: :too_large} = assigns),
-    do: ~H|<%= @label %>: larger than 10MB|
+    do: ~H|<%= @label %>: larger than 200MB|
 
   defp file_error(%{kind: :not_accepted} = assigns),
     do: ~H|<%= @label %>: not a valid MP3 file|
