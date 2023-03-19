@@ -6,10 +6,7 @@ defmodule LiveBeats.Audio do
     |> Task.async_stream(
       fn ss ->
         args = ~w[-ac 1 -ar 16k -f f32le -ss #{ss} -t #{chunk_time} -v quiet -]
-        # {data, 0} = System.cmd("/opt/homebrew/bin/ffmpeg", ["-i", path] ++ args)
-        cmd = System.cmd("/opt/homebrew/bin/ffmpeg", ["-i", path] ++ args)
-        |> IO.inspect(label: "DEBUG>>> cmd")
-        {data, 0} = cmd
+        {data, 0} = System.cmd("ffmpeg", ["-i", path] ++ args)
         {ss, Nx.Serving.batched_run(WhisperServing, Nx.from_binary(data, :f32))}
       end,
       max_concurrency: 4,
